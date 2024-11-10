@@ -28,6 +28,11 @@
       "id": "",
       "name": "artista",
       "bio": "biografia"
+    },
+    {
+      "id": "",
+      "name": "teste",
+      "bio": "bioo"
     }
   ]
 }

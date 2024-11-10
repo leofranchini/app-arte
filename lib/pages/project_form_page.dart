@@ -1,3 +1,5 @@
+// lib/pages/project_form_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
@@ -25,7 +27,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
       try {
         await apiService.createProject(newProject);
-        Navigator.pop(context, true); 
+        Navigator.pop(context, true);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao salvar projeto: $e')),
@@ -39,16 +41,30 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Adicionar Projeto'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Novo Projeto',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              SizedBox(height: 20),
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Título'),
+                decoration: InputDecoration(
+                  labelText: 'Título',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira um título';
@@ -56,16 +72,22 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                   return null;
                 },
               ),
+              SizedBox(height: 15),
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Descrição'),
+                decoration: InputDecoration(
+                  labelText: 'Descrição',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira uma descrição';
                   }
                   return null;
                 },
+                maxLines: 3,
               ),
+              SizedBox(height: 15),
               DropdownButtonFormField<String>(
                 value: _status,
                 onChanged: (value) {
@@ -73,6 +95,10 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                     _status = value!;
                   });
                 },
+                decoration: InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
                 items: ['Em andamento', 'Concluído', 'Pendente']
                     .map((status) => DropdownMenuItem(
                           value: status,
@@ -81,9 +107,21 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                     .toList(),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text('Salvar'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _submitForm,
+                  child: Text(
+                    'Salvar',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 30, vertical: 15), backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

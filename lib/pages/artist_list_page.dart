@@ -1,3 +1,5 @@
+// lib/pages/artist_list_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/artist.dart';
 import '../services/api_service.dart';
@@ -10,61 +12,78 @@ class ArtistListPage extends StatefulWidget {
 
 class _ArtistListPageState extends State<ArtistListPage> {
   final ApiService apiService = ApiService();
-  List<Artist> artists = [];
+  late Future<List<Artist>> _artistsFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadArtists();
-  }
-
-
-  Future<void> _loadArtists() async {
-    try {
-      final fetchedArtists = await apiService.fetchArtists();
-      setState(() {
-        artists = fetchedArtists;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar artistas: $e')),
-      );
-    }
-  }
-
-
-  void _navigateToAddArtist() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ArtistFormPage()),
-    );
-
-    if (result == true) {
-      _loadArtists(); 
-    }
+    _artistsFuture = apiService.fetchArtists();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista de Artistas'),
+        title: Text('Artistas'),
+        backgroundColor: Colors.purpleAccent,
       ),
-      body: artists.isEmpty
-          ? Center(child: CircularProgressIndicator()) 
-          : ListView.builder(
-              itemCount: artists.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(artists[index].name),
-                  subtitle: Text(artists[index].bio),
-                );
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<List<Artist>>(
+                future: _artistsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Erro ao carregar artistas.'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Nenhum artista encontrado.'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final artist = snapshot.data![index];
+                        return Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                              artist.name,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(artist.bio ?? 'Sem biografia'),
+                            contentPadding: EdgeInsets.all(15),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddArtist,
-        child: Icon(Icons.add),
-        tooltip: 'Adicionar Novo Artista',
+            SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ArtistFormPage()),
+                ).then((_) => setState(() {
+                      _artistsFuture = apiService.fetchArtists();
+                    }));
+              },
+              child: Text('Adicionar Artista'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15), backgroundColor: Colors.purpleAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

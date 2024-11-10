@@ -1,3 +1,5 @@
+// lib/pages/project_list_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
@@ -10,59 +12,79 @@ class ProjectListPage extends StatefulWidget {
 
 class _ProjectListPageState extends State<ProjectListPage> {
   final ApiService apiService = ApiService();
-  List<Project> projects = [];
+  late Future<List<Project>> _projectsFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadProjects();
-  }
-
-  Future<void> _loadProjects() async {
-    try {
-      final fetchedProjects = await apiService.fetchProjects();
-      setState(() {
-        projects = fetchedProjects;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar projetos: $e')),
-      );
-    }
-  }
-
-  void _navigateToAddProject() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ProjectFormPage()),
-    );
-
-    if (result == true) {
-      _loadProjects(); 
-    }
+    _projectsFuture = apiService.fetchProjects();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista de Projetos'),
+        title: Text('Projetos'),
+        backgroundColor: Colors.blueAccent,
       ),
-      body: projects.isEmpty
-          ? Center(child: CircularProgressIndicator()) 
-          : ListView.builder(
-              itemCount: projects.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(projects[index].title),
-                  subtitle: Text(projects[index].description),
-                );
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<List<Project>>(
+                future: _projectsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Erro ao carregar projetos.'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Nenhum projeto encontrado.'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final project = snapshot.data![index];
+                        return Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                              project.title,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                                project.description ?? 'Sem descrição'),
+                            contentPadding: EdgeInsets.all(15),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddProject,
-        child: Icon(Icons.add),
-        tooltip: 'Adicionar Novo Projeto',
+            SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProjectFormPage()),
+                ).then((_) => setState(() {
+                      _projectsFuture = apiService.fetchProjects();
+                    }));
+              },
+              child: Text('Adicionar Projeto'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15), backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
