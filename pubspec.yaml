@@ -1,0 +1,24 @@
+name: aplicativoarte
+description: Um aplicativo para gerenciar artistas e projetos.
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mockito: ^5.4.4  
+  http: ^0.13.6
+  flutter_test:
+    sdk: flutter
+  test: ^1.25.7
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data.json

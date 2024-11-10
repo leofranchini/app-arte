@@ -1,0 +1,33 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "title": "Project 1",
+      "description": "Description 1",
+      "status": "Em andamento"
+    },
+    {
+      "id": "2",
+      "title": "Project 2",
+      "description": "Description 2",
+      "status": "Concluído"
+    }
+  ],
+  "artists": [
+    {
+      "id": "1",
+      "name": "Artist 1",
+      "bio": "Bio 1"
+    },
+    {
+      "id": "2",
+      "name": "Artist 2",
+      "bio": "Bio 2"
+    },
+    {
+      "id": "",
+      "name": "artista",
+      "bio": "biografia"
+    }
+  ]
+}
